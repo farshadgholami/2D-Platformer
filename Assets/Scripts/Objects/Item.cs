@@ -8,7 +8,7 @@ public class Item : MonoBehaviour
     private bool savedStatus;
     private SpriteRenderer sprite;
 
-    private void Awake()
+    protected void Awake()
     {
         GameManager.SaveSceneAction += Save;
         GameManager.LoadSceneAction += Load;
