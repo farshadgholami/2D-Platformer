@@ -52,12 +52,12 @@ public class CharacterPhysic : Physic
     }
     protected override void MovementCheckDown()
     {
-        float threshold = 0.001f;
+        float threshold = 0.01f;
         List<RaycastHit2D> raycastList = new List<RaycastHit2D>();
         float leastDistance = -distance.y + threshold;
         for (int i = 0; i < raycastPointsY.Length; i++)
         {
-            RaycastHit2D[] points = Physics2D.RaycastAll((Vector2)transform.position - raycastPointsY[i] + threshold * Vector2.up, Vector2.down, leastDistance, fallLayerMask, 0, 0);
+            RaycastHit2D[] points = Physics2D.RaycastAll((Vector2)transform.position - raycastPointsY[i] + (threshold * Vector2.down), Vector2.down, leastDistance, fallLayerMask, 0, 0);
             foreach (RaycastHit2D hitPoint in points)
             {
                 if (hitPoint.collider != null && !hitPoint.collider.Equals(collider2d) && hitPoint.distance <= leastDistance)

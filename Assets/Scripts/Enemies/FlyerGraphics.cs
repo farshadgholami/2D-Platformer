@@ -6,7 +6,7 @@ public class FlyerGraphics : MonoBehaviour
 {
     private CharacterStats stats;
     private Animator animator;
-    private Vector2 lastHorizontalMovement;
+    private Vector2 lastHorizontalMovement = Vector2.right;
     private void Start()
     {
         stats = GetComponent<CharacterStats>();
