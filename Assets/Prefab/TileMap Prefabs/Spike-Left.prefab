@@ -70,7 +70,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e424d791bccadc418a4baade7948fc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  effectiveSides: 030000000000000002000000
+  effectiveSides: 03000000
 --- !u!1 &4986658637505387074
 GameObject:
   m_ObjectHideFlags: 0
