@@ -17,12 +17,14 @@ public class CharacterPhysic : Physic
     }
     protected override void Function()
     {
+        gameObject.layer = LayerMask.NameToLayer("Void");
         CapGravitySpeed();
         CalculateMovment();
         CalculateState();
         CalculateHit();
         HitActionFunction();
         ResetCalculate();
+        gameObject.layer = self_layer_mask_;
     }
     protected virtual void CalculateState()
     {
@@ -54,26 +56,22 @@ public class CharacterPhysic : Physic
     protected override void MovementCheckDown()
     {
         float threshold = 0.01f;
-        List<RaycastHit2D> raycastList = new List<RaycastHit2D>();
         float leastDistance = -distance.y + threshold;
-        for (int i = 0; i < raycastPointsY.Length; i++)
+        for (int i = 0 ; i < raycastPointsY.Length ; i++)
         {
-            RaycastHit2D[] points = Physics2D.RaycastAll((Vector2)transform.position - raycastPointsY[i] + (threshold * Vector2.down), Vector2.down, leastDistance, fallLayerMask, 0, 0);
-            foreach (RaycastHit2D hitPoint in points)
+            hitPoint = Physics2D.Raycast((Vector2)transform.position - raycastPointsY[i] + (threshold * Vector2.down) , Vector2.down , leastDistance , fallLayerMask , 0 , 0);
+            if (hitPoint.collider != null && hitPoint.distance <= leastDistance)
             {
-                if (hitPoint.collider != null && !hitPoint.collider.Equals(collider2d) && hitPoint.distance <= leastDistance)
-                {
-                    impactedSides.y = -1;
-                    leastDistance = hitPoint.distance;
-                    raycastList.Add(hitPoint);
-                }
+                impactedSides.y = -1;
+                leastDistance = hitPoint.distance;
+                v_raycast_list_.Add(hitPoint);
             }
         }
-        raycastList.RemoveAll(delegate (RaycastHit2D ray)
+        v_raycast_list_.RemoveAll(delegate (RaycastHit2D ray)
         {
             return ray.distance > leastDistance;
         });
-        UpdateImpactProperties(raycastList, Vector2.down);
+        UpdateImpactProperties(v_raycast_list_ , Vector2.down);
         ApplyMovement(Vector2.down * leastDistance);
     }
     public virtual void JumpDownLayerFix(bool on)
@@ -86,6 +84,7 @@ public class CharacterPhysic : Physic
     protected virtual void TurnOff()
     {
         enabled = false;
+        collider2d.enabled = false;
     }
     protected override void Load()
     {
@@ -93,6 +92,7 @@ public class CharacterPhysic : Physic
         if (!stats.IsDead)
         {
             enabled = true;
+            collider2d.enabled = true;
         }
     }
 }

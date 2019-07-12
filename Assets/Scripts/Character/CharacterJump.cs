@@ -36,6 +36,7 @@ public class CharacterJump : MonoBehaviour
         stats = GetComponent<CharacterStats>();
         gravity = GetComponent<Gravity>();
         stats.DeathAction += JumpStop;
+        stats.DeathAction += jumpDownReset;
         stats.onGroundAction += ChargeJump;
     }
     protected virtual void Function()
@@ -93,5 +94,9 @@ public class CharacterJump : MonoBehaviour
     public void JumpDown(bool on)
     {
         physic.JumpDownLayerFix(on);
+    }
+    private void jumpDownReset()
+    {
+        physic.JumpDownLayerFix(false);
     }
 }

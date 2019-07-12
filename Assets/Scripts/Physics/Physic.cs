@@ -18,6 +18,8 @@ abstract public class Physic : MonoBehaviour
     protected Vector2 systemSpeed;
     protected Vector2 size;
     protected Vector2 distance;
+    protected List<RaycastHit2D> h_raycast_list_;
+    protected List<RaycastHit2D> v_raycast_list_;
     protected List<ImpactProperty> impactProperties;
 
 
@@ -27,6 +29,8 @@ abstract public class Physic : MonoBehaviour
 
     protected int layerMask;
     protected Vector2 impactedSides;
+    protected int self_layer_mask_;
+    protected RaycastHit2D hitPoint;
 
     //Save
     protected Vector2 savedPostion;
@@ -47,36 +51,41 @@ abstract public class Physic : MonoBehaviour
     }
     protected virtual void Init()
     {
+        self_layer_mask_ = gameObject.layer;
         collider2d = GetComponent<BoxCollider2D>();
         size = transform.localScale * collider2d.size;
-        layerMask += LayerMask.GetMask("Block","Enemy");
+        layerMask += LayerMask.GetMask("Block" , "Enemy");
         CalculateRayCastPoints();
         impactProperties = new List<ImpactProperty>();
+        v_raycast_list_ = new List<RaycastHit2D>();
+        h_raycast_list_ = new List<RaycastHit2D>();
     }
     protected virtual void Function()
     {
+        gameObject.layer = LayerMask.NameToLayer("Void");
         CapGravitySpeed();
         CalculateMovment();
         CalculateHit();
         HitActionFunction();
         ResetCalculate();
+        gameObject.layer = self_layer_mask_;
     }
     private void CalculateRayCastPoints()
     {
         // calculate horizontal raycast point
         float cut = GameManager.MinSize;
         raycastPointsX = new Vector2[Mathf.CeilToInt(size.y / cut) + 1];
-        raycastPointsX[0] = new Vector2(size.x / 2, (-size.y / 2) + 0.01f);
-        raycastPointsX[raycastPointsX.Length - 1] = new Vector2(size.x / 2, (size.y / 2) - 0.01f);
-        for (int i = 1; i < raycastPointsX.Length - 1; i++)
+        raycastPointsX[0] = new Vector2(size.x / 2 , (-size.y / 2) + 0.01f);
+        raycastPointsX[raycastPointsX.Length - 1] = new Vector2(size.x / 2 , (size.y / 2) - 0.01f);
+        for (int i = 1 ; i < raycastPointsX.Length - 1 ; i++)
         {
             raycastPointsX[i] = raycastPointsX[i - 1] + Vector2.up * cut;
         }
         // calculate vertical raycast point
         raycastPointsY = new Vector2[Mathf.CeilToInt(size.x / cut) + 1];
-        raycastPointsY[0] = new Vector2((-size.x / 2) + 0.01f, size.y / 2);
-        raycastPointsY[raycastPointsY.Length - 1] = new Vector2(size.x / 2 - 0.01f, size.y / 2);
-        for (int i = 1; i < raycastPointsY.Length - 1; i++)
+        raycastPointsY[0] = new Vector2((-size.x / 2) + 0.01f , size.y / 2);
+        raycastPointsY[raycastPointsY.Length - 1] = new Vector2(size.x / 2 - 0.01f , size.y / 2);
+        for (int i = 1 ; i < raycastPointsY.Length - 1 ; i++)
         {
             raycastPointsY[i] = raycastPointsY[i - 1] + Vector2.right * cut;
         }
@@ -84,6 +93,8 @@ abstract public class Physic : MonoBehaviour
     //Protected Functions
     protected virtual void CalculateMovment()
     {
+        h_raycast_list_.Clear();
+        v_raycast_list_.Clear();
         impactProperties.Clear();
         distance = ((force + speed) / weight) * Time.deltaTime;
         if (distance.x > 0)
@@ -105,98 +116,85 @@ abstract public class Physic : MonoBehaviour
     }
     protected virtual void MovementCheckRight()
     {
-        List<RaycastHit2D> raycastList = new List<RaycastHit2D>();
         float leastDistance = distance.x;
-        for (int i = 0; i < raycastPointsX.Length; i++)
+        for (int i = 0 ; i < raycastPointsX.Length ; i++)
         {
-            RaycastHit2D[] points = Physics2D.RaycastAll((Vector2)transform.position + raycastPointsX[i], Vector2.right, leastDistance, layerMask, 0, 0);
-            foreach (RaycastHit2D hitPoint in points)
+            hitPoint = Physics2D.Raycast((Vector2)transform.position + raycastPointsX[i] , Vector2.right , leastDistance , layerMask , 0 , 0);
+            if (hitPoint.collider != null && hitPoint.distance <= leastDistance)
             {
-                if (hitPoint.collider != null && !hitPoint.collider.Equals(collider2d) && hitPoint.distance <= leastDistance)
-                {
-                    impactedSides.x = 1;
-                    leastDistance = hitPoint.distance;
-                    raycastList.Add(hitPoint);
-                }
+                impactedSides.x = 1;
+                leastDistance = hitPoint.distance;
+                h_raycast_list_.Add(hitPoint);
             }
         }
-        raycastList.RemoveAll(delegate (RaycastHit2D ray)
+        h_raycast_list_.RemoveAll(delegate (RaycastHit2D ray)
         {
             return ray.distance > leastDistance;
         });
-        UpdateImpactProperties(raycastList, Vector2.right);
+        UpdateImpactProperties(h_raycast_list_ , Vector2.right);
         ApplyMovement(Vector2.right * leastDistance);
     }
     protected virtual void MovementCheckLeft()
     {
-        List<RaycastHit2D> raycastList = new List<RaycastHit2D>();
         float leastDistance = -distance.x;
-        for (int i = 0; i < raycastPointsX.Length; i++)
+        for (int i = 0 ; i < raycastPointsX.Length ; i++)
         {
-            RaycastHit2D[] points = Physics2D.RaycastAll((Vector2)transform.position - raycastPointsX[i], Vector2.left, leastDistance, layerMask, 0, 0);
-            foreach (RaycastHit2D hitPoint in points)
+            hitPoint = Physics2D.Raycast((Vector2)transform.position - raycastPointsX[i] , Vector2.left , leastDistance , layerMask , 0 , 0);
+            if (hitPoint.collider != null && !hitPoint.collider.Equals(collider2d) && hitPoint.distance <= leastDistance)
             {
-                if (hitPoint.collider != null && !hitPoint.collider.Equals(collider2d) && hitPoint.distance <= leastDistance)
-                {
-                    impactedSides.x = -1;
-                    leastDistance = hitPoint.distance;
-                    raycastList.Add(hitPoint);
-                }
+                impactedSides.x = -1;
+                leastDistance = hitPoint.distance;
+                h_raycast_list_.Add(hitPoint);
             }
         }
-        raycastList.RemoveAll(delegate (RaycastHit2D ray)
+        h_raycast_list_.RemoveAll(delegate (RaycastHit2D ray)
         {
             return ray.distance > leastDistance;
         });
-        UpdateImpactProperties(raycastList, Vector2.left);
+        UpdateImpactProperties(h_raycast_list_ , Vector2.left);
         ApplyMovement(Vector2.left * leastDistance);
     }
     protected virtual void MovementCheckUp()
     {
-        List<RaycastHit2D> raycastList = new List<RaycastHit2D>();
         float leastDistance = distance.y;
-        for (int i = 0; i < raycastPointsY.Length; i++)
+        for (int i = 0 ; i < raycastPointsY.Length ; i++)
         {
-            RaycastHit2D[] points = Physics2D.RaycastAll((Vector2)transform.position + raycastPointsY[i], Vector2.up, leastDistance, layerMask, 0, 0);
-            foreach (RaycastHit2D hitPoint in points)
+            hitPoint = Physics2D.Raycast((Vector2)transform.position + raycastPointsY[i] , Vector2.up , leastDistance , layerMask , 0 , 0);
+            if (hitPoint.collider != null && !hitPoint.collider.Equals(collider2d) && hitPoint.distance <= leastDistance)
             {
-                if (hitPoint.collider != null && !hitPoint.collider.Equals(collider2d) && hitPoint.distance <= leastDistance)
-                {
-                    impactedSides.y = 1;
-                    leastDistance = hitPoint.distance;
-                    raycastList.Add(hitPoint);
-                }
+                impactedSides.y = 1;
+                leastDistance = hitPoint.distance;
+                v_raycast_list_.Add(hitPoint);
             }
         }
-        raycastList.RemoveAll(delegate (RaycastHit2D ray)
+        v_raycast_list_.RemoveAll(delegate (RaycastHit2D ray)
         {
             return ray.distance > leastDistance;
         });
-        UpdateImpactProperties(raycastList, Vector2.up);
+        UpdateImpactProperties(v_raycast_list_ , Vector2.up);
         ApplyMovement(Vector2.up * leastDistance);
     }
     protected virtual void MovementCheckDown()
     {
-        List<RaycastHit2D> raycastList = new List<RaycastHit2D>();
         float leastDistance = -distance.y;
-        for (int i = 0; i < raycastPointsY.Length; i++)
+        for (int i = 0 ; i < raycastPointsY.Length ; i++)
         {
-            RaycastHit2D[] points = Physics2D.RaycastAll((Vector2)transform.position - raycastPointsY[i], Vector2.down, leastDistance, layerMask, 0, 0);
+            RaycastHit2D[] points = Physics2D.RaycastAll((Vector2)transform.position - raycastPointsY[i] , Vector2.down , leastDistance , layerMask , 0 , 0);
             foreach (RaycastHit2D hitPoint in points)
             {
                 if (hitPoint.collider != null && !hitPoint.collider.Equals(collider2d) && hitPoint.distance <= leastDistance)
                 {
                     impactedSides.y = -1;
                     leastDistance = hitPoint.distance;
-                    raycastList.Add(hitPoint);
+                    v_raycast_list_.Add(hitPoint);
                 }
             }
         }
-        raycastList.RemoveAll(delegate (RaycastHit2D ray)
+        v_raycast_list_.RemoveAll(delegate (RaycastHit2D ray)
         {
             return ray.distance > leastDistance;
         });
-        UpdateImpactProperties(raycastList, Vector2.down);
+        UpdateImpactProperties(v_raycast_list_ , Vector2.down);
         ApplyMovement(Vector2.down * leastDistance);
     }
     protected virtual void ApplyMovement(Vector2 distance)
@@ -217,27 +215,27 @@ abstract public class Physic : MonoBehaviour
         impactedSides = Vector2.zero;
         systemSpeed = Vector2.zero;
     }
-    protected virtual void UpdateImpactProperties(List<RaycastHit2D> raycastList, Vector2 side)
+    protected virtual void UpdateImpactProperties(List<RaycastHit2D> raycastList , Vector2 side)
     {
         foreach (RaycastHit2D hit in raycastList)
         {
             ImpactEffect[] impactEffects = hit.collider.gameObject.GetComponents<ImpactEffect>();
             foreach (ImpactEffect effect in impactEffects)
             {
-                impactProperties.Add(new ImpactProperty(effect, side));
+                impactProperties.Add(new ImpactProperty(effect , side));
             }
         }
     }
     protected void CapGravitySpeed()
     {
-        if(force.y < 0)
+        if (force.y < 0)
         {
             force.y = Mathf.Max(force.y , -(GameManager.instance.pMaxGravitySpeed) * weight);
         }
     }
     protected virtual void HitActionFunction()
     {
-        if(impactedSides != Vector2.zero)
+        if (impactedSides != Vector2.zero)
         {
             HitAction?.Invoke();
         }
