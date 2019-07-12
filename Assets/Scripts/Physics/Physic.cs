@@ -55,6 +55,7 @@ abstract public class Physic : MonoBehaviour
     }
     protected virtual void Function()
     {
+        CapGravitySpeed();
         CalculateMovment();
         CalculateHit();
         HitActionFunction();
@@ -225,6 +226,13 @@ abstract public class Physic : MonoBehaviour
             {
                 impactProperties.Add(new ImpactProperty(effect, side));
             }
+        }
+    }
+    protected void CapGravitySpeed()
+    {
+        if(force.y < 0)
+        {
+            force.y = Mathf.Max(force.y , -(GameManager.instance.pMaxGravitySpeed) * weight);
         }
     }
     protected virtual void HitActionFunction()

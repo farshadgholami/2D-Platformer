@@ -17,6 +17,7 @@ public class CharacterPhysic : Physic
     }
     protected override void Function()
     {
+        CapGravitySpeed();
         CalculateMovment();
         CalculateState();
         CalculateHit();

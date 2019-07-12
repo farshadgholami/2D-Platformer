@@ -17,6 +17,8 @@ public class GameManager : MonoBehaviour
     private float gravityForce;
     [SerializeField]
     private Vector2 gravityDirection;
+    [SerializeField]
+    private float max_gravity_speed_ = 12.5f;
 
     public static GameManager instance;
     private void Awake()
@@ -64,5 +66,6 @@ public class GameManager : MonoBehaviour
     public static Action LateStartAction { get { return instance.lateStartAction; } set { instance.lateStartAction = value; } }
     public static float MinSize { get { return instance.minSize; } }
     public Vector2 GravityDirection { get { return gravityDirection; } set { gravityDirection = value; } }
+    public float pMaxGravitySpeed { get { return max_gravity_speed_; } }
     public float GravityForce { get { return gravityForce; } }
 }
