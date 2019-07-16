@@ -8,6 +8,7 @@ public class PlayerControl : MonoBehaviour
     private CharacterJump jump;
     private Gun gun;
     private PlayerStats stats;
+    private INGameMenu menu;
     private bool paused;
 
     // Use this for initialization
@@ -17,6 +18,7 @@ public class PlayerControl : MonoBehaviour
         jump = GetComponent<CharacterJump>();
         gun = GetComponentInChildren<Gun>();
         stats = GetComponent<PlayerStats>();
+        menu = INGameMenu.sSingletone;
     }
     // Update is called once per frame
     void Update()
@@ -31,6 +33,18 @@ public class PlayerControl : MonoBehaviour
         MoveInput();
         JumpInput();
         GunInput();
+        Menu();
+    }
+
+    private void Menu()
+    {
+        if (menu != null)
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                menu.show();
+            }
+        }
     }
     private void Death()
     {
@@ -106,24 +120,6 @@ public class PlayerControl : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
             gun.Draw();
-        }
-    }
-    private void Pause()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (!paused)
-            {
-                Cursor.visible = true;
-                Cursor.lockState = CursorLockMode.None;
-                paused = true;
-            }
-            else
-            {
-                Cursor.visible = false;
-                Cursor.lockState = CursorLockMode.Locked;
-                paused = false;
-            }
         }
     }
 }

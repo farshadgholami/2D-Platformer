@@ -8,11 +8,12 @@ public class KeyOut : ImpactEffect
     {
         foreach (ImpactProperty impactproperty in physic.ImpactProperties)
         {
-            if (effectiveSides.Contains(Toolkit.VectorToSide(impactproperty.impactSide)))
+
+            if (impactproperty.impactEffect is KeyIn)
             {
-                if (impactproperty.impactEffect is KeyIn)
+                if (effectiveSides.Contains(Toolkit.VectorToSide(impactproperty.impactSide)))
                 {
-                    impactproperty.impactEffect.EffectCheck(impactproperty.impactSide, gameObject);
+                    impactproperty.impactEffect.EffectCheck(impactproperty.impactSide , gameObject);
                 }
             }
         }

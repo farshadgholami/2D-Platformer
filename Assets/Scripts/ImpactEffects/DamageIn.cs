@@ -20,11 +20,11 @@ public class DamageIn : ImpactEffect
     {
         foreach (ImpactProperty impactproperty in physic.ImpactProperties)
         {
-            if (effectiveSides.Contains(Toolkit.VectorToSide(impactproperty.impactSide)))
+            if (impactproperty.impactEffect is DamageOut)
             {
-                if (impactproperty.impactEffect is DamageOut)
+                if (effectiveSides.Contains(Toolkit.VectorToSide(impactproperty.impactSide)))
                 {
-                    impactproperty.impactEffect.EffectCheck(impactproperty.impactSide, gameObject);
+                    impactproperty.impactEffect.EffectCheck(impactproperty.impactSide , gameObject);
                 }
             }
         }

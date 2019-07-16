@@ -13,11 +13,11 @@ public class DamageOut : ImpactEffect
     {
         foreach (ImpactProperty impactproperty in physic.ImpactProperties)
         {
-            if (effectiveSides.Contains(Toolkit.VectorToSide(impactproperty.impactSide)))
+            if (impactproperty.impactEffect is DamageIn)
             {
-                if (impactproperty.impactEffect is DamageIn)
+                if (effectiveSides.Contains(Toolkit.VectorToSide(impactproperty.impactSide)))
                 {
-                    impactproperty.impactEffect.EffectCheck(impactproperty.impactSide, gameObject);
+                    impactproperty.impactEffect.EffectCheck(impactproperty.impactSide , gameObject);
                 }
             }
         }
