@@ -59,7 +59,7 @@ public class CharacterPhysic : Physic
         float leastDistance = -distance.y + threshold;
         for (int i = 0 ; i < raycastPointsY.Length ; i++)
         {
-            hitPoint = Physics2D.Raycast((Vector2)transform.position - raycastPointsY[i] + (threshold * Vector2.down) , Vector2.down , leastDistance , fallLayerMask , 0 , 0);
+            hitPoint = Physics2D.Raycast((Vector2)transform.position - raycastPointsY[i] - (threshold * Vector2.down) , Vector2.down , leastDistance , fallLayerMask , 0 , 0);
             if (hitPoint.collider != null && hitPoint.distance <= leastDistance)
             {
                 impactedSides.y = -1;
@@ -72,7 +72,7 @@ public class CharacterPhysic : Physic
             return ray.distance > leastDistance;
         });
         UpdateImpactProperties(v_raycast_list_ , Vector2.down);
-        ApplyMovement(Vector2.down * leastDistance);
+        ApplyMovement(Vector2.down * (leastDistance - threshold));
     }
     public virtual void JumpDownLayerFix(bool on)
     {
