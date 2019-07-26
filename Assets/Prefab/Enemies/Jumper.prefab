@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 8981807658215525978}
   - component: {fileID: 713316335556191899}
   - component: {fileID: 713316335556191895}
+  - component: {fileID: 3221472134512571271}
   m_Layer: 12
   m_Name: Jumper
   m_TagString: Jumper
@@ -177,6 +178,27 @@ MonoBehaviour:
   jumpSpeedBase: 13
   jumpAcceleration: 0
   jumpAccelerateTime: 0
+--- !u!50 &3221472134512571271
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8981807658215525972}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 7
 --- !u!1 &8981807658482383159
 GameObject:
   m_ObjectHideFlags: 0

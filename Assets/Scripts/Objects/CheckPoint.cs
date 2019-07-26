@@ -9,7 +9,7 @@ public class CheckPoint : MonoBehaviour
     {
         if (!used && collision.CompareTag("Player"))
         {
-            //used = true;
+            used = true;
             GetComponent<Animator>().Play("Activated",0,0);
             GameManager.SaveScene();            
         }

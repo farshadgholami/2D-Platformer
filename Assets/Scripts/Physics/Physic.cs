@@ -21,6 +21,7 @@ abstract public class Physic : MonoBehaviour
     protected List<RaycastHit2D> h_raycast_list_;
     protected List<RaycastHit2D> v_raycast_list_;
     protected List<ImpactProperty> impactProperties;
+    protected List<GameObject> impacted_objects_;
 
 
     protected Vector2[] raycastPointsX;
@@ -57,6 +58,7 @@ abstract public class Physic : MonoBehaviour
         layerMask += LayerMask.GetMask("Block" , "Enemy");
         CalculateRayCastPoints();
         impactProperties = new List<ImpactProperty>();
+        impacted_objects_ = new List<GameObject>();
         v_raycast_list_ = new List<RaycastHit2D>();
         h_raycast_list_ = new List<RaycastHit2D>();
     }
@@ -96,6 +98,7 @@ abstract public class Physic : MonoBehaviour
         h_raycast_list_.Clear();
         v_raycast_list_.Clear();
         impactProperties.Clear();
+        impacted_objects_.Clear();
         distance = ((force + speed) / weight) * Time.deltaTime;
         if (distance.x > 0)
         {
@@ -219,10 +222,15 @@ abstract public class Physic : MonoBehaviour
     {
         foreach (RaycastHit2D hit in raycastList)
         {
-            ImpactEffect[] impactEffects = hit.collider.gameObject.GetComponents<ImpactEffect>();
-            foreach (ImpactEffect effect in impactEffects)
+            var impact_object = hit.collider.gameObject;
+            if (!impacted_objects_.Contains(impact_object))
             {
-                impactProperties.Add(new ImpactProperty(effect , side));
+                var impactEffects = impact_object.GetComponents<ImpactEffect>();
+                foreach (ImpactEffect effect in impactEffects)
+                {
+                    impactProperties.Add(new ImpactProperty(effect , side));
+                }
+                impacted_objects_.Add(impact_object);
             }
         }
     }
