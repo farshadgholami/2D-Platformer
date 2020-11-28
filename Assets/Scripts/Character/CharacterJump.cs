@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CharacterJump : MonoBehaviour
 {
@@ -12,6 +10,8 @@ public class CharacterJump : MonoBehaviour
     private float jumpAcceleration;
     [SerializeField]
     private float jumpAccelerateTime;
+    [SerializeField]
+    private bool hasDoubleJump;
 
     private float currentAccelerateTime;
     private bool accelerate;
@@ -20,8 +20,8 @@ public class CharacterJump : MonoBehaviour
     private CharacterStats stats;
     private Gravity gravity;
     private bool jumpCommand;
-    private bool canJump = true;
-    // Use this for initialization
+    private int jumpCount;
+    
     private void Start()
     {
         Init();
@@ -58,21 +58,32 @@ public class CharacterJump : MonoBehaviour
     public void JumpStart()
     {
         jumpCommand = true;
-        if (stats.FeetState == FeetStateE.OnGround && canJump)
-        {
-            ResetJump();
-            canJump = false;
-            stats.Jumped = true;
-            accelerate = true;
-            physic.AddForce(-gravity.Direction * (jumpSpeedBase) * physic.Weight);
-        }
+        if (CanJump()) 
+            JumpUp();
     }
+
+    private bool CanJump()
+    {
+        if (jumpCount == 0 && stats.FeetState == FeetStateE.OnGround) return true;
+        if (hasDoubleJump && jumpCount == 1) return true;
+        return false;
+    }
+
+    private void JumpUp()
+    {
+        ResetJump();
+        jumpCount++;
+        stats.Jumped = true;
+        accelerate = true;
+        physic.AddForce(-gravity.Direction * (jumpSpeedBase) * physic.Weight);
+    }
+    
     public void HitJump()
     {
-        if (stats.FeetState == FeetStateE.OnGround && canJump)
+        if (CanJump())
         {
             ResetJump();
-            canJump = false;
+            jumpCount++;
             stats.Jumped = true;
             accelerate = jumpCommand;
             physic.AddForce(-gravity.Direction * (hitJumpBaseSpeed - physic.Force.y ) * physic.Weight);
@@ -89,7 +100,7 @@ public class CharacterJump : MonoBehaviour
     }
     private void ChargeJump()
     {
-        canJump = true;
+        jumpCount = 0;
     }
     public void JumpDown(bool on)
     {
