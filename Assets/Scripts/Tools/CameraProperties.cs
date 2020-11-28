@@ -43,6 +43,9 @@ public class CameraProperties : MonoBehaviour
     }
     private void OnDrawGizmosSelected()
     {
+        if (boundless)
+            return;
+
         float drawZoom;
         if (zoom > 0)
             drawZoom = zoom;
@@ -51,7 +54,7 @@ public class CameraProperties : MonoBehaviour
 
         Gizmos.color = Color.cyan;
         Vector2 center = new Vector2((leftDown.x + (rightUp.x - leftDown.x) / 2), (leftDown.y + (rightUp.y - leftDown.y) / 2));
-        Vector2 size = new Vector2((rightUp.x - leftDown.x), (rightUp.y - leftDown.y)) + new Vector2(2 * Camera.main.aspect * Camera.main.orthographicSize, 2 * Camera.main.orthographicSize);
+        Vector2 size = new Vector2((rightUp.x - leftDown.x), (rightUp.y - leftDown.y)) + new Vector2(2 * Camera.main.aspect * drawZoom, 2 * drawZoom);
         Gizmos.DrawWireCube(center, size);
     }
 }
