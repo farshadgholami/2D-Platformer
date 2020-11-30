@@ -10,6 +10,10 @@ public class CharacterMovement : MonoBehaviour
     protected float moveSpeedMax;
     [SerializeField]
     protected float moveAcceleration;
+    [SerializeField]
+    private bool hasSprint;
+    [SerializeField]
+    private float sprintSpeedMultiplier;
 
     protected float moveSpeed;
     protected bool accelerate;
@@ -18,7 +22,9 @@ public class CharacterMovement : MonoBehaviour
     protected Physic physic;
     protected Gravity gravity;
     protected Vector2 side;
-    // Use this for initialization
+
+    public bool IsRun { get; set; }
+    
     private void Start()
     {
         Init();
@@ -42,7 +48,7 @@ public class CharacterMovement : MonoBehaviour
                 }
                 stats.SpeedMult = moveSpeed / moveSpeedBase;
             }
-            physic.AddSpeed(moveSpeed * side);
+            physic.AddSpeed(moveSpeed * (IsRun && hasSprint ? sprintSpeedMultiplier : 1) * side);
         }
     }
     protected virtual void Init()
@@ -83,6 +89,12 @@ public class CharacterMovement : MonoBehaviour
     {
         MoveReset();
         stats.BodyState = BodyStateE.Idle;
+    }
+
+    public bool Accelerate
+    {
+        get => accelerate;
+        set => accelerate = value;
     }
 
     public float Increment { get { return increment; } set { increment = value; } }

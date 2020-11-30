@@ -94,6 +94,8 @@ MonoBehaviour:
   moveSpeedBase: 4
   moveSpeedMax: 6
   moveAcceleration: 1
+  hasSprint: 1
+  sprintSpeedMultiplier: 2
 --- !u!114 &6198766385952507397
 MonoBehaviour:
   m_ObjectHideFlags: 0

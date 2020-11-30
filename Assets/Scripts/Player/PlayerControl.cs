@@ -92,7 +92,28 @@ public class PlayerControl : MonoBehaviour
         {
             move.MoveStop(Vector2.left);
         }
+
+        AccelerateInput();
+        
+        SprintInput();
     }
+
+    private void AccelerateInput()
+    {
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+            move.Accelerate = true;
+        else if (Input.GetKeyUp(KeyCode.LeftControl))
+            move.Accelerate = false;
+    }
+
+    private void SprintInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Z))
+            move.IsRun = true;
+        else if (Input.GetKeyUp(KeyCode.Z))
+            move.IsRun = false;
+    }
+
     private void JumpInput()
     {
         if (Input.GetKeyDown(KeyCode.Space))
