@@ -55,6 +55,7 @@ public class PlayerControl : MonoBehaviour
     }
     private void MoveInput()
     {
+        if (stats.BodyState == BodyStateE.WallJump) return;
         //MoveUp
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {

@@ -26,6 +26,7 @@ public class CharacterPhysic : Physic
         ResetCalculate();
         gameObject.layer = self_layer_mask_;
     }
+    
     protected virtual void CalculateState()
     {
         if ((impactedSides - gravity.Direction) * gravity.Direction == Vector2.zero)
@@ -40,6 +41,8 @@ public class CharacterPhysic : Physic
             }
             stats.FeetState = FeetStateE.OnGround;
         }
+        else if (impactedSides.x < -0.5f) stats.FeetState = FeetStateE.OnLeftWall;
+        else if (impactedSides.x > 0.5f) stats.FeetState = FeetStateE.OnRightWall;
         else
         {
             Vector2 moveDirection = ((distance) * gravity.Direction).normalized;
@@ -53,6 +56,7 @@ public class CharacterPhysic : Physic
             }
         }
     }
+    
     protected override void MovementCheckDown()
     {
         float threshold = 0.01f;

@@ -123,6 +123,10 @@ MonoBehaviour:
   jumpSpeedBase: 10
   jumpAcceleration: 35
   jumpAccelerateTime: 0.25
+  hasDoubleJump: 0
+  hasWallJump: 1
+  wallJumpSpeedBase: 8
+  wallJumpTime: 0.3
 --- !u!61 &6198766385952507394
 BoxCollider2D:
   m_ObjectHideFlags: 0

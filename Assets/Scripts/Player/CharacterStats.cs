@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 
 public class CharacterStats : MonoBehaviour
@@ -8,6 +6,7 @@ public class CharacterStats : MonoBehaviour
     public Action onGroundAction;
     public Action fallAction;
     public Action DeathAction;
+    public Action onWallAction;
 
     [SerializeField]
     private int health;
@@ -65,9 +64,10 @@ public class CharacterStats : MonoBehaviour
     }
     public FeetStateE FeetState
     {
-        get { return feetState; }
+        get => feetState;
         set
         {
+            feetState = value;
             if (value == FeetStateE.Falling)
             {
                 fallAction?.Invoke();
@@ -76,8 +76,14 @@ public class CharacterStats : MonoBehaviour
             {
                 onGroundAction?.Invoke();
             }
-            feetState = value;
+            else if (IsFeetOnWall())
+                onWallAction?.Invoke();
         }
+    }
+
+    public bool IsFeetOnWall()
+    {
+        return FeetState == FeetStateE.OnLeftWall || FeetState == FeetStateE.OnRightWall;
     }
     public BodyStateE BodyState { get { return bodyState; } set { bodyState = value; } }
     public HandStateE HandState { get { return handState; } set { handState = value; } }
@@ -104,8 +110,9 @@ public class CharacterStats : MonoBehaviour
     public bool Shot { get { return shot; } set { shot = value; } }
     public float SpeedMult { get { return speedMult; } set { speedMult = value; } }
     public bool IsDead { get { return dead; } }
+    public bool IsOnWallJump { get; set; }
 }
-public enum FeetStateE { OnGround, Jumping, Falling }
-public enum BodyStateE { Idle, Moveing, Laying, ChargeJump, StandingUp }
+public enum FeetStateE { OnGround, OnRightWall, OnLeftWall, Jumping, Falling }
+public enum BodyStateE { Idle, Moveing, Laying, ChargeJump, StandingUp, WallJump }
 public enum MoveTypeE { Ground, Flying }
 public enum HandStateE { Idle, DrawingGun, HidingGun, Drawed, Shooting }

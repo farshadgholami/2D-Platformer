@@ -25,7 +25,7 @@ public class FatManGraphics : MonoBehaviour
             Death();
             return;
         }
-        if (stats.FeetState == FeetStateE.Jumping)
+        if (stats.FeetState == FeetStateE.Jumping || stats.IsFeetOnWall())
         {
             Jump();
         }
