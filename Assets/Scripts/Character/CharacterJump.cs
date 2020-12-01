@@ -19,6 +19,8 @@ public class CharacterJump : MonoBehaviour
     private float wallJumpSpeedBase = 5;
     [SerializeField] 
     private float wallJumpTime;
+    [SerializeField]
+    private float jumpInputBufferingTime;
 
     private float currentAccelerateTime;
     private bool accelerate;
@@ -28,6 +30,8 @@ public class CharacterJump : MonoBehaviour
     private Gravity gravity;
     private bool jumpCommand;
     private int jumpCount;
+    private IEnumerator jumpEnumerator;
+    private IEnumerator wallJumpEnumerator;
     
     private void Start()
     {
@@ -66,8 +70,20 @@ public class CharacterJump : MonoBehaviour
     public void JumpStart()
     {
         jumpCommand = true;
-        if (CanJump()) 
-            JumpUp();
+        if (jumpEnumerator != null) StopCoroutine(jumpEnumerator);
+        StartCoroutine(jumpEnumerator = Jump());
+    }
+
+    private IEnumerator Jump()
+    {
+        var passedTime = 0f;
+        while (!CanJump() && passedTime < jumpInputBufferingTime)
+        {
+            passedTime += Time.deltaTime;
+            yield return null;
+        }
+        
+        JumpUp();
     }
 
     private bool CanJump()
@@ -94,11 +110,11 @@ public class CharacterJump : MonoBehaviour
 
     private void JumpOnWall()
     {
-        StopAllCoroutines();
-        StartCoroutine(JWall());
+        if (stats.BodyState == BodyStateE.WallJump) return;
+        StartCoroutine(wallJumpEnumerator = WallJump());
     }
 
-    private IEnumerator JWall()
+    private IEnumerator WallJump()
     {
         stats.IsOnWallJump = true;
         stats.BodyState = BodyStateE.WallJump;
@@ -135,6 +151,7 @@ public class CharacterJump : MonoBehaviour
     {
         jumpCommand = false;
         accelerate = false;
+        StopCoroutine(jumpEnumerator);
     }
     private void ResetJump()
     {
