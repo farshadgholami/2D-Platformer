@@ -259,7 +259,12 @@ public class CharacterJump : MonoBehaviour
 
     private void CancelBuffer()
     {
-        jumpBuffer.Clear();
+        while (jumpBuffer.Count > 0)
+        {
+            var jumpProperty = jumpBuffer.Dequeue();
+            jumpProperty.IsEnded = true;
+            jumpPool.Push(jumpProperty);
+        }
     }
 
     private IEnumerator PressDurationCounter(JumpProperty jumpProperty)
