@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CharacterMovement : MonoBehaviour
 {
@@ -60,14 +58,22 @@ public class CharacterMovement : MonoBehaviour
     }
     public virtual void MoveStart(Vector2 direction)
     {
-        if ((direction * gravity.Direction).Equals(Vector2.zero))
+        if (!(direction * gravity.Direction).Equals(Vector2.zero)) return;
+        if (stats.BodyState != BodyStateE.Moveing)
         {
             MoveReset();
             stats.BodyState = BodyStateE.Moveing;
-            side = direction;
-            stats.MoveSide = direction;
+            SetMovementSide(direction);
         }
+        else if (!side.Equals(direction)) SetMovementSide(direction);
     }
+
+    private void SetMovementSide(Vector2 direction)
+    {
+        side = direction;
+        stats.MoveSide = direction;
+    }
+    
     public virtual void MoveStop(Vector2 direction)
     {
         if (direction == side)

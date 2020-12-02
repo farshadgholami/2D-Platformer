@@ -110,7 +110,6 @@ public class CharacterStats : MonoBehaviour
     public bool Shot { get { return shot; } set { shot = value; } }
     public float SpeedMult { get { return speedMult; } set { speedMult = value; } }
     public bool IsDead { get { return dead; } }
-    public bool IsOnWallJump { get; set; }
 }
 public enum FeetStateE { OnGround, OnRightWall, OnLeftWall, Jumping, Falling }
 public enum BodyStateE { Idle, Moveing, Laying, ChargeJump, StandingUp, WallJump }

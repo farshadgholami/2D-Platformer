@@ -140,7 +140,7 @@ public class JumperBrain : MonoBehaviour
         currentJumpDistance = 0;
         stats.BodyState = BodyStateE.Idle;
         move.Increment = movementSpeedIncreas;
-        jump.JumpStart();
+        jump.StartJumpUp();
     }
     public bool HitGround
     {

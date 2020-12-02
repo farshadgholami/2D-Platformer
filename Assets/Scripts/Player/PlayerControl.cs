@@ -1,9 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 
 public class PlayerControl : MonoBehaviour
 {
+    public static event Action<InputType> OnPressInput;
     private CharacterMovement move;
     private CharacterJump jump;
     private Gun gun;
@@ -56,52 +56,44 @@ public class PlayerControl : MonoBehaviour
     private void MoveInput()
     {
         if (stats.BodyState == BodyStateE.WallJump) return;
-        //MoveUp
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            // move.MovePressed(Vector2.up);
-        }
-        else if (Input.GetKeyUp(KeyCode.W))
-        {
-            //move.MoveReleased(Vector2.up);
-        }
-        //Move Down
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            //move.MovePressed(Vector2.down);
-        }
-        else if (Input.GetKeyUp(KeyCode.S))
-        {
-            //move.MoveReleased(Vector2.down);
-        }
-        //Move Right
-        if (Input.GetKeyDown(KeyCode.RightArrow))
+        
+        if (Input.GetKey(KeyCode.RightArrow) && Input.GetKey(KeyCode.LeftArrow))
         {
             move.MoveStart(Vector2.right);
+            PressInput(InputType.RightArrow);
         }
-        else if (Input.GetKeyUp(KeyCode.RightArrow))
+        else if (Input.GetKey(KeyCode.RightArrow))
+        {
+            move.MoveStart(Vector2.right);
+            PressInput(InputType.RightArrow);
+        }
+        else if (Input.GetKey(KeyCode.LeftArrow))
+        {
+            move.MoveStart(Vector2.left);
+            PressInput(InputType.LeftArrow);
+        }
+        
+        if (Input.GetKeyUp(KeyCode.RightArrow))
         {
             move.MoveStop(Vector2.right);
         }
-        //Move left
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
-        {
-            move.MoveStart(Vector2.left);
-        }
-        else if (Input.GetKeyUp(KeyCode.LeftArrow))
+        
+        if (Input.GetKeyUp(KeyCode.LeftArrow))
         {
             move.MoveStop(Vector2.left);
         }
 
         AccelerateInput();
-        
         SprintInput();
     }
 
     private void AccelerateInput()
     {
         if (Input.GetKeyDown(KeyCode.LeftControl))
+        {
             move.Accelerate = true;
+            PressInput(InputType.Accelerate);
+        }
         else if (Input.GetKeyUp(KeyCode.LeftControl))
             move.Accelerate = false;
     }
@@ -109,7 +101,10 @@ public class PlayerControl : MonoBehaviour
     private void SprintInput()
     {
         if (Input.GetKeyDown(KeyCode.Z))
+        {
             move.IsRun = true;
+            PressInput(InputType.Sprint);
+        }
         else if (Input.GetKeyUp(KeyCode.Z))
             move.IsRun = false;
     }
@@ -118,19 +113,21 @@ public class PlayerControl : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            jump.JumpStart();
+            PressInput(InputType.Space);
+            jump.StartJumpUp();
         }
         else if (Input.GetKeyUp(KeyCode.Space))
         {
-            jump.JumpStop();
+            jump.EndJump();
         }
-        if (Input.GetKey(KeyCode.DownArrow))
+        if (Input.GetKeyDown(KeyCode.DownArrow))
         {
-            jump.JumpDown(true);
+            PressInput(InputType.DownArrow);
+            jump.StartJumpDown();
         }
         else if (Input.GetKeyUp(KeyCode.DownArrow))
         {
-            jump.JumpDown(false);
+            jump.EndJump();
         }
     }
     private void GunInput()
@@ -138,11 +135,30 @@ public class PlayerControl : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
             gun.shoot();
+            PressInput(InputType.Shoot);
         }
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
             gun.Draw();
+            PressInput(InputType.UpArrow);
         }
     }
+
+    private void PressInput(InputType inputType)
+    {
+        OnPressInput?.Invoke(inputType);
+    }
+}
+
+public enum InputType
+{
+    RightArrow,
+    LeftArrow,
+    UpArrow,
+    DownArrow,
+    Space,
+    Shoot,
+    Sprint,
+    Accelerate
 }
 
