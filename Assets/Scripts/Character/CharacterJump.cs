@@ -152,10 +152,13 @@ public class CharacterJump : MonoBehaviour
         if (hasWallJump && stats.IsFeetOnWall())
             StartCoroutine(JumpOnWall(jumpProperty));
         else
-        {
-            StartCoroutine(accelerateEnumerator = AccelerateSpeed(jumpProperty));
-            physic.AddForce(-gravity.Direction * (jumpSpeedBase * physic.Weight));
-        }
+            JumpUpStrieght(jumpProperty);
+    }
+
+    private void JumpUpStrieght(JumpProperty jumpProperty)
+    {
+        StartCoroutine(accelerateEnumerator = AccelerateSpeed(jumpProperty));
+        physic.AddForce(-gravity.Direction * (jumpSpeedBase * physic.Weight));
     }
 
     private IEnumerator JumpDown(JumpProperty jumpProperty)
@@ -297,36 +300,36 @@ public class CharacterJump : MonoBehaviour
         jumpProperty.IsInProgress = false;
         jumpPool.Push(jumpProperty);
     }
-    
-    private class JumpProperty
-    {
-        public JumpType Type;
-        public float PressDuration;
-        public Vector2 MoveSide;
-        public bool IsInProgress;
+}
 
-        public JumpProperty()
-        {
-            IsInProgress = false;
-        }
+public class JumpProperty
+{
+    public JumpType Type;
+    public float PressDuration;
+    public Vector2 MoveSide;
+    public bool IsInProgress;
+
+    public JumpProperty()
+    {
+        IsInProgress = false;
+    }
         
-        public JumpProperty(JumpType type, Vector2 moveSide, float pressDuration = 0f, bool isInProgress = false)
-        {
-            SetProperty(type, moveSide, pressDuration, isInProgress);
-        }
-
-        public void SetProperty(JumpType type, Vector2 moveSide, float pressDuration, bool isInProgress)
-        {
-            Type = type;
-            MoveSide = moveSide; 
-            PressDuration = pressDuration;
-            IsInProgress = isInProgress;
-        }
-    }
-    
-    private enum JumpType
+    public JumpProperty(JumpType type, Vector2 moveSide, float pressDuration = 0f, bool isInProgress = false)
     {
-        Up,
-        Down
+        SetProperty(type, moveSide, pressDuration, isInProgress);
     }
+
+    public void SetProperty(JumpType type, Vector2 moveSide, float pressDuration, bool isInProgress)
+    {
+        Type = type;
+        MoveSide = moveSide; 
+        PressDuration = pressDuration;
+        IsInProgress = isInProgress;
+    }
+}
+    
+public enum JumpType
+{
+    Up,
+    Down
 }
