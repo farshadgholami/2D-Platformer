@@ -55,6 +55,7 @@ public class CharacterJump : MonoBehaviour
         stats = GetComponent<CharacterStats>();
         gravity = GetComponent<Gravity>();
         lastJump = new JumpProperty();
+        ReleaseJumpProperty(lastJump);
         
         stats.DeathAction += CancelJump;
         stats.DeathAction += JumpDownReset;
@@ -123,12 +124,12 @@ public class CharacterJump : MonoBehaviour
     {
         if (jumpType == JumpType.Up)
             return CanJumpUp();
-        return lastJump.IsEnded;
+        return !lastJump.IsInProgress;
     }
 
     private bool CanJumpUp()
     {
-        if (hasWallJump && stats.BodyState == BodyStateE.WallJump) return false;
+        if (stats.BodyState == BodyStateE.WallJump) return false;
         if (jumpCount == 0 && (stats.FeetState == FeetStateE.OnGround || hasWallJump && stats.IsFeetOnWall())) return true;
         if (hasDoubleJump && jumpCount == 1) return true;
         return false;
@@ -137,6 +138,7 @@ public class CharacterJump : MonoBehaviour
     private void Jump(JumpProperty jumpProperty)
     {
         lastJump = jumpProperty;
+        jumpProperty.IsInProgress = true;
         if (jumpProperty.Type == JumpType.Down)
             StartCoroutine(JumpDown(jumpProperty));
         else
@@ -159,7 +161,12 @@ public class CharacterJump : MonoBehaviour
     private IEnumerator JumpDown(JumpProperty jumpProperty)
     {
         physic.JumpDownLayerFix(true);
-        yield return new WaitForSeconds(jumpProperty.PressDuration);
+        var timePassed = 0f;
+        while (timePassed < jumpProperty.PressDuration)
+        {
+            timePassed += Time.deltaTime;
+            yield return null;
+        }
         physic.JumpDownLayerFix(false);
         ReleaseJumpProperty(jumpProperty);
     }
@@ -262,7 +269,7 @@ public class CharacterJump : MonoBehaviour
         while (jumpBuffer.Count > 0)
         {
             var jumpProperty = jumpBuffer.Dequeue();
-            jumpProperty.IsEnded = true;
+            jumpProperty.IsInProgress = false;
             jumpPool.Push(jumpProperty);
         }
     }
@@ -276,18 +283,18 @@ public class CharacterJump : MonoBehaviour
         }
     }
 
-    private JumpProperty GetJumpProperty(JumpType type, Vector2 moveSide, float pressDuration = 0f, bool isEnded = false)
+    private JumpProperty GetJumpProperty(JumpType type, Vector2 moveSide, float pressDuration = 0f, bool isInProgress = false)
     {
-        if (jumpPool.Count == 0) return new JumpProperty(type, moveSide, pressDuration, isEnded);
+        if (jumpPool.Count == 0) return new JumpProperty(type, moveSide, pressDuration, isInProgress);
         
         var jumpProperty = jumpPool.Pop();
-        jumpProperty.SetProperty(type, moveSide, pressDuration, isEnded);
+        jumpProperty.SetProperty(type, moveSide, pressDuration, isInProgress);
         return jumpProperty;
     }
 
     private void ReleaseJumpProperty(JumpProperty jumpProperty)
     {
-        jumpProperty.IsEnded = true;
+        jumpProperty.IsInProgress = false;
         jumpPool.Push(jumpProperty);
     }
     
@@ -296,24 +303,24 @@ public class CharacterJump : MonoBehaviour
         public JumpType Type;
         public float PressDuration;
         public Vector2 MoveSide;
-        public bool IsEnded;
+        public bool IsInProgress;
 
         public JumpProperty()
         {
-            IsEnded = true;
+            IsInProgress = false;
         }
         
-        public JumpProperty(JumpType type, Vector2 moveSide, float pressDuration = 0f, bool isEnded = false)
+        public JumpProperty(JumpType type, Vector2 moveSide, float pressDuration = 0f, bool isInProgress = false)
         {
-            SetProperty(type, moveSide, pressDuration, isEnded);
+            SetProperty(type, moveSide, pressDuration, isInProgress);
         }
 
-        public void SetProperty(JumpType type, Vector2 moveSide, float pressDuration, bool isEnded)
+        public void SetProperty(JumpType type, Vector2 moveSide, float pressDuration, bool isInProgress)
         {
             Type = type;
             MoveSide = moveSide; 
             PressDuration = pressDuration;
-            IsEnded = isEnded;
+            IsInProgress = isInProgress;
         }
     }
     
