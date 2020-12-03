@@ -1,16 +1,17 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-abstract public class Physic : MonoBehaviour
+public abstract class Physic : MonoBehaviour
 {
     public Action HitActionEffects;
     public Action HitAction;
+    public event Action<Collider2D> OnCollision;
 
     [SerializeField]
     private float weight;
 
+    private float collisionCheckDistance = 0.01f;
     private float friction;
     protected Vector2 force;
     protected Vector2 speed;
@@ -29,7 +30,7 @@ abstract public class Physic : MonoBehaviour
     protected BoxCollider2D collider2d;
 
     protected int layerMask;
-    protected Vector2 impactedSides;
+    protected Impact impact;
     protected int self_layer_mask_;
     protected RaycastHit2D hitPoint;
 
@@ -67,12 +68,13 @@ abstract public class Physic : MonoBehaviour
         gameObject.layer = LayerMask.NameToLayer("Void");
         CapGravitySpeed();
         CalculateMovment();
+        CheckCollisionEnter();
         CalculateHit();
         HitActionFunction();
         ResetCalculate();
         gameObject.layer = self_layer_mask_;
     }
-    private void CalculateRayCastPoints()
+    protected void CalculateRayCastPoints()
     {
         // calculate horizontal raycast point
         float cut = GameManager.MinSize;
@@ -125,7 +127,7 @@ abstract public class Physic : MonoBehaviour
             hitPoint = Physics2D.Raycast((Vector2)transform.position + raycastPointsX[i] , Vector2.right , leastDistance , layerMask , 0 , 0);
             if (hitPoint.collider != null && hitPoint.distance <= leastDistance)
             {
-                impactedSides.x = 1;
+                impact.RightCollider = hitPoint.collider;
                 leastDistance = hitPoint.distance;
                 h_raycast_list_.Add(hitPoint);
             }
@@ -145,7 +147,7 @@ abstract public class Physic : MonoBehaviour
             hitPoint = Physics2D.Raycast((Vector2)transform.position - raycastPointsX[i] , Vector2.left , leastDistance , layerMask , 0 , 0);
             if (hitPoint.collider != null && !hitPoint.collider.Equals(collider2d) && hitPoint.distance <= leastDistance)
             {
-                impactedSides.x = -1;
+                impact.LeftCollider = hitPoint.collider;
                 leastDistance = hitPoint.distance;
                 h_raycast_list_.Add(hitPoint);
             }
@@ -165,7 +167,7 @@ abstract public class Physic : MonoBehaviour
             hitPoint = Physics2D.Raycast((Vector2)transform.position + raycastPointsY[i] , Vector2.up , leastDistance , layerMask , 0 , 0);
             if (hitPoint.collider != null && !hitPoint.collider.Equals(collider2d) && hitPoint.distance <= leastDistance)
             {
-                impactedSides.y = 1;
+                impact.UpCollider = hitPoint.collider;
                 leastDistance = hitPoint.distance;
                 v_raycast_list_.Add(hitPoint);
             }
@@ -187,7 +189,7 @@ abstract public class Physic : MonoBehaviour
             {
                 if (hitPoint.collider != null && !hitPoint.collider.Equals(collider2d) && hitPoint.distance <= leastDistance)
                 {
-                    impactedSides.y = -1;
+                    impact.DownCollider = hitPoint.collider;
                     leastDistance = hitPoint.distance;
                     v_raycast_list_.Add(hitPoint);
                 }
@@ -204,18 +206,64 @@ abstract public class Physic : MonoBehaviour
     {
         transform.position += (Vector3)distance;
     }
+
+    protected void CheckCollisionEnter()
+    {
+        if (!impact.Left) impact.LeftCollider = CheckImpact(raycastPointsX, Vector2.left, collisionCheckDistance, layerMask);
+        if (!impact.Right) impact.RightCollider = CheckImpact(raycastPointsX, Vector2.right, collisionCheckDistance, layerMask);
+        if (!impact.Up) impact.UpCollider = CheckImpact(raycastPointsY, Vector2.up, collisionCheckDistance, layerMask);
+        if (!impact.Down) impact.DownCollider = CheckImpact(raycastPointsY, Vector2.down, collisionCheckDistance, layerMask);
+        
+        NotifyOnCollision();
+    }
+
+    private void NotifyOnCollision()
+    {
+        if (impact.Left) OnCollision?.Invoke(impact.LeftCollider);
+        if (impact.Right) OnCollision?.Invoke(impact.RightCollider);
+        if (impact.Up) OnCollision?.Invoke(impact.UpCollider);
+        if (impact.Down) OnCollision?.Invoke(impact.DownCollider);
+    }
+    
+    private Collider2D CheckImpact(Vector2[] raycastPoints, Vector2 direction, float distance, int layerMask)
+    {
+        List<RaycastHit2D> raycastHitList = null;
+        foreach (var raycastPoint in raycastPoints)
+        {
+            hitPoint = Physics2D.Raycast((Vector2) transform.position + raycastPoint * Mathf.Sign(direction.x + direction.y), direction,
+                distance, layerMask, 0, 0);
+            
+            if (!IsRaycastHit(hitPoint, distance)) continue;
+            
+            if (raycastHitList == null) raycastHitList = new List<RaycastHit2D>();
+            raycastHitList.Add(hitPoint);
+            distance = hitPoint.distance;
+        }
+
+        if (raycastHitList == null) return null;
+        
+        raycastHitList.RemoveAll(delegate (RaycastHit2D ray) { return ray.distance > distance; });
+        UpdateImpactProperties(raycastHitList, direction);
+        return raycastHitList[0].collider;
+    }
+    
+    private bool IsRaycastHit(RaycastHit2D hitPoint, float distance)
+    {
+        return hitPoint.collider != null && !hitPoint.collider.Equals(collider2d) && hitPoint.distance <= distance;
+    }
+    
     protected virtual void CalculateHit()
     {
-        if (impactedSides.x != 0)
+        if (impact.Right || impact.Left)
             force.x = 0;
-        if (impactedSides.y != 0)
+        if (impact.Up || impact.Down)
             force.y = 0;
     }
     protected virtual void ResetCalculate()
     {
         speed = Vector2.zero;
         impactForce = Vector2.zero;
-        impactedSides = Vector2.zero;
+        impact.Reset();
         systemSpeed = Vector2.zero;
     }
     protected virtual void UpdateImpactProperties(List<RaycastHit2D> raycastList , Vector2 side)
@@ -243,7 +291,7 @@ abstract public class Physic : MonoBehaviour
     }
     protected virtual void HitActionFunction()
     {
-        if (impactedSides != Vector2.zero)
+        if (impact.HasImpact())
         {
             HitAction?.Invoke();
         }
@@ -280,7 +328,15 @@ abstract public class Physic : MonoBehaviour
     {
         force = Vector2.zero;
     }
+
+    public bool HasImpact(Vector2 direction)
+    {
+        return impact.HasImpact(direction);
+    }
+
     //Public Get Attributes
+
+    public Impact ImpactSide => impact;
     public Vector2 Force { get { return force; } }
     public Vector2 Speed { get { return speed; } }
     public Vector2 ImpactForce { get { return impactForce; } }
@@ -289,8 +345,42 @@ abstract public class Physic : MonoBehaviour
     public float Friction { get { return friction; } }
     public BoxCollider2D Collider2D { get { return collider2d; } }
     public List<ImpactProperty> ImpactProperties { get { return impactProperties; } }
-    public Vector2 ImpactedSides { get { return impactedSides; } }
     public int Layer { get { return layerMask; } set { layerMask = value; } }
+
+    public struct Impact
+    {
+        public bool Up => UpCollider;
+        public bool Down => DownCollider;
+        public bool Right => RightCollider;
+        public bool Left => LeftCollider;
+        
+        public Collider2D UpCollider;
+        public Collider2D DownCollider;
+        public Collider2D RightCollider;
+        public Collider2D LeftCollider;
+
+        public void Reset()
+        {
+            UpCollider = null;
+            DownCollider = null;
+            RightCollider = null;
+            LeftCollider = null;
+        }
+
+        public bool HasImpact()
+        {
+            return Up || Down || Right || Left;
+        }
+
+        public bool HasImpact(Vector2 direction)
+        {
+            if (direction.Equals(Vector2.left) && Left) return true;
+            if (direction.Equals(Vector2.right) && Right) return true;
+            if (direction.Equals(Vector2.up) && Up) return true;
+            if (direction.Equals(Vector2.down) && Down) return true;
+            return false;
+        }
+    }
 }
 
 

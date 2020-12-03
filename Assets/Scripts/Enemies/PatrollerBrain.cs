@@ -60,7 +60,7 @@ public class PatrollerBrain : MonoBehaviour
     }
     private void HitCheck()
     {
-        if ((physic.ImpactedSides - moveDirection) * moveDirection == Vector2.zero)
+        if (physic.HasImpact(moveDirection))
         {
             moveDirection *= -1;
             targetAvailable = false;

@@ -20,6 +20,7 @@ public class CharacterPhysic : Physic
         gameObject.layer = LayerMask.NameToLayer("Void");
         CapGravitySpeed();
         CalculateMovment();
+        CheckCollisionEnter();
         CalculateState();
         CalculateHit();
         HitActionFunction();
@@ -29,7 +30,7 @@ public class CharacterPhysic : Physic
     
     protected virtual void CalculateState()
     {
-        if ((impactedSides - gravity.Direction) * gravity.Direction == Vector2.zero)
+        if (impact.HasImpact(gravity.Direction))
         {
             if (stats.FeetState != FeetStateE.OnGround)
             {
@@ -41,8 +42,8 @@ public class CharacterPhysic : Physic
             }
             stats.FeetState = FeetStateE.OnGround;
         }
-        else if (impactedSides.x < -0.5f) stats.FeetState = FeetStateE.OnLeftWall;
-        else if (impactedSides.x > 0.5f) stats.FeetState = FeetStateE.OnRightWall;
+        else if (impact.Left) stats.FeetState = FeetStateE.OnLeftWall;
+        else if (impact.Right) stats.FeetState = FeetStateE.OnRightWall;
         else
         {
             Vector2 moveDirection = ((distance) * gravity.Direction).normalized;
@@ -66,7 +67,7 @@ public class CharacterPhysic : Physic
             hitPoint = Physics2D.Raycast((Vector2)transform.position - raycastPointsY[i] - (threshold * Vector2.down) , Vector2.down , leastDistance , fallLayerMask , 0 , 0);
             if (hitPoint.collider != null && hitPoint.distance <= leastDistance)
             {
-                impactedSides.y = -1;
+                impact.DownCollider = hitPoint.collider;
                 leastDistance = hitPoint.distance;
                 v_raycast_list_.Add(hitPoint);
             }

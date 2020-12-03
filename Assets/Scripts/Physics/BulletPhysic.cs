@@ -19,6 +19,7 @@ public class BulletPhysic : Physic
     protected override void Function()
     {
         CalculateMovment();
+        CheckCollisionEnter();
         CalculateHit();
     }
     protected override void CalculateMovment()
