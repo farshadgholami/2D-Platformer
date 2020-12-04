@@ -18,6 +18,8 @@ public class CharacterJump : MonoBehaviour
     private bool hasWallJump;
     [SerializeField]
     private float wallJumpSpeedBase = 5;
+    [SerializeField]
+    private float wallJumpSlope;
     [SerializeField] 
     private float wallJumpTime;
     [SerializeField]
@@ -196,23 +198,53 @@ public class CharacterJump : MonoBehaviour
 
     private IEnumerator JumpOnWall(JumpProperty jumpProperty)
     {
-        stats.BodyState = BodyStateE.WallJump;
-        var wallJumpForce = GetWallJumpDirection() * (wallJumpSpeedBase * physic.Weight);
-        physic.AddSpeed(-physic.Speed);
-        physic.AddForce(wallJumpForce);
-        var moveSide = wallJumpForce.x >= 0 ? Vector2.right : Vector2.left;
-        stats.MoveSide = moveSide;
-        
-        yield return new WaitForSeconds(wallJumpTime);
-        physic.AddForce(Vector2.right * -physic.Force.x);
+        PrepareWallJump();
+        InitialWallJump();
 
+        yield return WaitForWallJumpEnd();
+
+        physic.AddForce(-physic.Force);
+        
+        yield return new WaitForSeconds(0.1f);
+
+        TerminateWallJump(jumpProperty);
+    }
+
+    private IEnumerator WaitForWallJumpEnd()
+    {
+        var timePassed = 0f;
+        while (timePassed < wallJumpTime && Mathf.Abs(physic.Force.x) > 0 && Mathf.Abs(physic.Force.y) > 0)
+        {
+            timePassed += Time.deltaTime;
+            yield return null;
+        }
+    }
+
+    private void PrepareWallJump()
+    {
+        stats.BodyState = BodyStateE.WallJump;
+        gravity.Disabled = true;
+        physic.AddForce(-physic.Force);
+        physic.AddSpeed(-physic.Speed);
+    }
+
+    private void InitialWallJump()
+    {
+        var wallJumpForce = GetWallJumpDirection() * (wallJumpSpeedBase * physic.Weight);
+        physic.AddForce(wallJumpForce);
+        stats.MoveSide = wallJumpForce.x >= 0 ? Vector2.right : Vector2.left;
+    }
+
+    private void TerminateWallJump(JumpProperty jumpProperty)
+    {
+        gravity.Disabled = false;
         if (stats.BodyState == BodyStateE.WallJump) stats.BodyState = BodyStateE.Idle;
         ReleaseJumpProperty(jumpProperty);
     }
 
     private Vector2 GetWallJumpDirection()
     {
-        return -(gravity.Direction + (stats.FeetState == FeetStateE.OnLeftWall ? Vector2.left : Vector2.right));
+        return -(gravity.Direction * wallJumpSlope + (stats.FeetState == FeetStateE.OnLeftWall ? Vector2.left : Vector2.right));
     }
     
     public void HitJump()
