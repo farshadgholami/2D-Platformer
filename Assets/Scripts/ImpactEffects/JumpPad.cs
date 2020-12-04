@@ -23,7 +23,7 @@ public class JumpPad : ImpactEffect
         foreach (ImpactProperty impactproperty in physic.ImpactProperties)
         {
             if (!effectedTags.Contains(impactproperty.impactEffect.tag)) continue;
-            if (effectiveSides.Contains(Toolkit.VectorToSide(impactproperty.impactSide))) return;
+            if (!effectiveSides.Contains(Toolkit.VectorToSide(impactproperty.impactSide))) return;
             Effect(impactproperty.impactEffect.gameObject);
         }
     }
