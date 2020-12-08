@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 
 public class CharacterPhysic : Physic
@@ -15,6 +14,17 @@ public class CharacterPhysic : Physic
         fallLayerMask = layerMask + LayerMask.GetMask("Bridge");
         stats.DeathAction += TurnOff;
     }
+
+    private void OnDrawGizmos()
+    {
+        if (raycastPointsY == null || raycastPointsY.Length == 0) return;
+        foreach (var point in raycastPointsY)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawSphere((Vector2) transform.position - point, 0.01f);
+        }
+    }
+
     protected override void Function()
     {
         gameObject.layer = LayerMask.NameToLayer("Void");
@@ -58,27 +68,21 @@ public class CharacterPhysic : Physic
         }
     }
     
-    protected override void MovementCheckDown()
+    protected override void MovementCheckDown(float distance)
     {
-        float threshold = 0.01f;
-        float leastDistance = -distance.y + threshold;
-        for (int i = 0 ; i < raycastPointsY.Length ; i++)
-        {
-            hitPoint = Physics2D.Raycast((Vector2)transform.position - raycastPointsY[i] - (threshold * Vector2.down) , Vector2.down , leastDistance , fallLayerMask , 0 , 0);
-            if (hitPoint.collider != null && hitPoint.distance <= leastDistance)
-            {
-                impact.DownCollider = hitPoint.collider;
-                leastDistance = hitPoint.distance;
-                v_raycast_list_.Add(hitPoint);
-            }
-        }
-        v_raycast_list_.RemoveAll(delegate (RaycastHit2D ray)
-        {
-            return ray.distance > leastDistance;
-        });
-        UpdateImpactProperties(v_raycast_list_ , Vector2.down);
-        ApplyMovement(Vector2.down * (leastDistance - threshold));
+        MoveToDirection(raycastPointsY, Vector2.down, distance, 0.01f, fallLayerMask);
     }
+    
+    protected override void CheckCollisionEnter()
+    {
+        if (!impact.Left) CheckImpact(raycastPointsX, Vector2.left, collisionCheckDistance, layerMask);
+        if (!impact.Right) CheckImpact(raycastPointsX, Vector2.right, collisionCheckDistance, layerMask);
+        if (!impact.Up) CheckImpact(raycastPointsY, Vector2.up, collisionCheckDistance, layerMask);
+        if (!impact.Down) CheckImpact(raycastPointsY, Vector2.down, collisionCheckDistance, fallLayerMask);
+        
+        NotifyOnCollision();
+    }
+    
     public virtual void JumpDownLayerFix(bool on)
     {
         if (on)
