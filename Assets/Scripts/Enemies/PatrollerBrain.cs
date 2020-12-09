@@ -1,43 +1,40 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class PatrollerBrain : MonoBehaviour
+public class PatrollerBrain : EnemyBrain
 {
-    [SerializeField]
-    protected Side direction;
-
-    protected Vector2 moveDirection;
-    private CharacterStats stats;
-    private CharacterPhysic physic;
-    private CharacterMovement move;
-    private Gravity gravity;
-
-    protected Vector2 target;
-    protected bool targetAvailable;
     protected Vector2 reservedDirection;
-
-    private Vector2 savedMoveDirection;
-    private Vector2 savedTarget;
     private Vector2 savedReserevedDirection;
-    private bool savedTargetStatus;
-    private void Awake()
+
+    protected override void Awake()
     {
-        Init();
+        base.Awake();
         GameManager.SaveSceneAction += Save;
         GameManager.LoadSceneAction += Load;
-    }
-
-    private void Start()
-    {
-        stats = GetComponent<CharacterStats>();
-        physic = GetComponent<CharacterPhysic>();
-        move = GetComponent<CharacterMovement>();
-        gravity = GetComponent<Gravity>();
+        
         physic.Layer += LayerMask.GetMask("Player");
         physic.HitAction += HitCheck;
+    }
+
+    private void OnEnable()
+    {
+        ResetBrain();
+    }
+
+    protected override void ResetBrain()
+    {
+        base.ResetBrain();
         MovementCommand();
     }
+    
+    protected override void CalculateDirection()
+    {
+        moveDirection = Toolkit.SideToVector(direction);
+        if(moveDirection != Vector2.right)
+        {
+            moveDirection = Vector2.left;
+        }
+    }
+
     private void Update()
     {
         if (targetAvailable)
@@ -48,14 +45,6 @@ public class PatrollerBrain : MonoBehaviour
                 moveDirection = reservedDirection;
                 MovementCommand();
             }
-        }
-    }
-    protected virtual void Init()
-    {
-        moveDirection = Toolkit.SideToVector(direction);
-        if(moveDirection != Vector2.right)
-        {
-            moveDirection = Vector2.left;
         }
     }
     private void HitCheck()

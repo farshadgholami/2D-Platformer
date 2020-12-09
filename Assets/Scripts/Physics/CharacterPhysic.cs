@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CharacterPhysic : Physic
 {
@@ -13,16 +12,6 @@ public class CharacterPhysic : Physic
         gravity = GetComponent<Gravity>();
         fallLayerMask = layerMask + LayerMask.GetMask("Bridge");
         stats.DeathAction += TurnOff;
-    }
-
-    private void OnDrawGizmos()
-    {
-        if (raycastPointsY == null || raycastPointsY.Length == 0) return;
-        foreach (var point in raycastPointsY)
-        {
-            Gizmos.color = Color.green;
-            Gizmos.DrawSphere((Vector2) transform.position - point, 0.01f);
-        }
     }
 
     protected override void Function()
@@ -93,15 +82,22 @@ public class CharacterPhysic : Physic
     protected virtual void TurnOff()
     {
         enabled = false;
-        collider2d.enabled = false;
+        Collider.enabled = false;
     }
+
+    public virtual void TurnOn()
+    {
+        enabled = true;
+        Collider.enabled = true;
+    }
+    
     protected override void Load()
     {
         base.Load();
         if (!stats.IsDead)
         {
             enabled = true;
-            collider2d.enabled = true;
+            Collider.enabled = true;
         }
     }
 }

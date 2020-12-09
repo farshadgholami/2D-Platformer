@@ -7,6 +7,7 @@ public class CharacterStats : MonoBehaviour
     public Action fallAction;
     public Action DeathAction;
     public Action onWallAction;
+    public event Action<GameObject> OnDead;
 
     [SerializeField]
     private int health;
@@ -34,13 +35,36 @@ public class CharacterStats : MonoBehaviour
     protected bool savedHealthStatus;
 
 
-    private void Awake()
+    private void OnEnable()
     {
-        layerMask = gameObject.layer;
-        currentHealth = health;
         GameManager.SaveSceneAction += Save;
         GameManager.LoadSceneAction += Load;
+        
+        layerMask = gameObject.layer;
+        currentHealth = health;
     }
+
+    public void ResetState()
+    {
+        dead = false;
+        speedMult = 1;
+        jumped = false;
+        hitGround = false;
+        shot = false;
+        shooting = false;
+        moveSide = Vector2.right;
+        moveType = MoveTypeE.Ground;
+        feetState = FeetStateE.OnGround;
+        bodyState = BodyStateE.Idle;
+        handState = HandStateE.Idle;
+    }
+
+    private void OnDisable()
+    {
+        GameManager.SaveSceneAction -= Save;
+        GameManager.LoadSceneAction -= Load;
+    }
+
     protected virtual void Save()
     {
         savedHealth = currentHealth;
@@ -57,6 +81,7 @@ public class CharacterStats : MonoBehaviour
     }
     protected virtual void Death()
     {
+        OnDead?.Invoke(gameObject);
         dead = true;
         gameObject.layer = LayerMask.NameToLayer("Void");
 

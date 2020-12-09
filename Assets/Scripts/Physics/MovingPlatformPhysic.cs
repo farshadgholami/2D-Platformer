@@ -9,16 +9,6 @@ public class MovingPlatformPhysic : NormalPhysic
         ResetCalculate();
     }
     
-    private void OnDrawGizmos()
-    {
-        if (raycastPointsY == null || raycastPointsY.Length == 0) return;
-        foreach (var point in raycastPointsY)
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawSphere((Vector2) transform.position + point, 0.01f);
-        }
-    }
-    
     protected override void CalculateMovment()
     {
         impactProperties.Clear();

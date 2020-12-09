@@ -9,6 +9,11 @@ public class PatrollerDirectionChange : MonoBehaviour
 
     private Collider2D collider_;
 
+    public Side Side
+    {
+        set => side = value;
+    }
+
     private void Start()
     {
         collider_ = GetComponent<Collider2D>();
@@ -17,7 +22,7 @@ public class PatrollerDirectionChange : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Patroller"))
+        if (collision.CompareTag("Patroller") || collision.CompareTag("PatrollerFlyer"))
         {
             collision.GetComponent<PatrollerBrain>().SetTarget(transform.position, Toolkit.SideToVector(side));
         }

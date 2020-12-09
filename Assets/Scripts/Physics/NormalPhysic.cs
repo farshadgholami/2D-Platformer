@@ -8,8 +8,7 @@ public class NormalPhysic : Physic
     {
         impact.Initial();
         self_layer_mask_ = gameObject.layer;
-        collider2d = GetComponent<BoxCollider2D>();
-        size = transform.localScale * collider2d.size;
+        size = transform.localScale * Collider.size;
         layerMask += layer.value;
         CalculateRayCastPoints();
         impactProperties = new List<ImpactProperty>();

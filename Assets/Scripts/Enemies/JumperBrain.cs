@@ -1,48 +1,56 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 
-public class JumperBrain : MonoBehaviour
+public class JumperBrain : EnemyBrain
 {
-    [SerializeField]
-    private Side direction;
     [SerializeField]
     private float visionRadius;
     [SerializeField]
     private float jumpDistance;
     [SerializeField]
     private float movementSpeedIncreas;
+
     private float currentJumpDistance;
-
-
-    private CharacterStats stats;
-    private CharacterPhysic physic;
-    private CharacterMovement move;
+    private int layerMask;
+    private bool targetVisible;
     private CharacterJump jump;
-    private Gravity gravity;
-
-    protected int layerMask;
-
-    protected Vector2 moveDirection;
-    protected Vector2 target;
-    protected bool targetAvailable;
-    protected bool targetVisible;
     private bool hitGround;
-
-    private Vector2 savedMoveDirection;
-    private Vector2 savedTarget;
-    private bool savedTargetStatus;
     private bool savedTargetVisibilityStatus;
     private bool saveHitGround;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
+        gravity = GetComponent<Gravity>();
         GameManager.SaveSceneAction += Save;
         GameManager.LoadSceneAction += Load;
+
+        physic.Layer += LayerMask.GetMask("Player");
+        layerMask = LayerMask.GetMask("Player", "Block");
     }
-    void Start()
+
+    private void OnEnable()
     {
-        Init();
+        ResetBrain();
+    }
+
+    protected override void ResetBrain()
+    {
+        base.ResetBrain();
+        targetVisible = false;
+        hitGround = false;
+        stats.MoveSide = moveDirection;
+        stats.BodyState = BodyStateE.Laying;
+        currentJumpDistance = jumpDistance;
+    }
+
+    protected override void CalculateDirection()
+    {
+        moveDirection = Toolkit.SideToVector(direction);
+        if (moveDirection != Vector2.right)
+        {
+            moveDirection = Vector2.left;
+        }
     }
     void Update()
     {
@@ -52,24 +60,6 @@ public class JumperBrain : MonoBehaviour
         Vision();
         Movement();
         Jump();
-    }
-    protected virtual void Init()
-    {
-        currentJumpDistance = jumpDistance;
-        moveDirection = Toolkit.SideToVector(direction);
-        if (moveDirection != Vector2.right)
-        {
-            moveDirection = Vector2.left;
-        }
-        stats = GetComponent<CharacterStats>();
-        physic = GetComponent<CharacterPhysic>();
-        move = GetComponent<CharacterMovement>();
-        jump = GetComponent<CharacterJump>();
-        gravity = GetComponent<Gravity>();
-        physic.Layer += LayerMask.GetMask("Player");
-        stats.MoveSide = moveDirection;
-        layerMask = LayerMask.GetMask("Player", "Block");
-        stats.BodyState = BodyStateE.Laying;
     }
     protected virtual void Vision()
     {

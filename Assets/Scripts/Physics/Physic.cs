@@ -12,7 +12,6 @@ public abstract class Physic : MonoBehaviour
     [SerializeField]
     private float weight;
 
-    private float friction;
     protected Vector2 force;
     protected Vector2 speed;
     protected Vector2 impactForce;
@@ -25,22 +24,40 @@ public abstract class Physic : MonoBehaviour
     protected float collisionCheckDistance = 0.01f;
     protected Vector2[] raycastPointsX;
     protected Vector2[] raycastPointsY;
-    protected BoxCollider2D collider2d;
-
     protected int layerMask;
     protected Impact impact;
     protected int self_layer_mask_;
     protected RaycastHit2D hitPoint;
 
-    //Save
     protected Vector2 savedPostion;
     protected Vector2 savedForce;
+
+    private float friction;
+    private BoxCollider2D collider2d;
+
+    protected BoxCollider2D Collider
+    {
+        get
+        {
+            if (!collider2d) collider2d = GetComponent<BoxCollider2D>();
+            return collider2d;
+        }
+    }
 
     private void Awake()
     {
         GameManager.SaveSceneAction += Save;
         GameManager.LoadSceneAction += Load;
+        
+        impactProperties = new List<ImpactProperty>();
+        impacted_objects_ = new List<GameObject>();
     }
+
+    protected virtual void OnEnable()
+    {
+        ResetCalculate();
+    }
+
     private void Start()
     {
         Init();
@@ -53,12 +70,9 @@ public abstract class Physic : MonoBehaviour
     {
         impact.Initial();
         self_layer_mask_ = gameObject.layer;
-        collider2d = GetComponent<BoxCollider2D>();
-        size = transform.localScale * collider2d.size;
+        size = transform.localScale * Collider.size;
         layerMask += LayerMask.GetMask("Block" , "Enemy");
         CalculateRayCastPoints();
-        impactProperties = new List<ImpactProperty>();
-        impacted_objects_ = new List<GameObject>();
     }
     protected virtual void Function()
     {
@@ -175,7 +189,7 @@ public abstract class Physic : MonoBehaviour
     
     private bool IsRaycastHit(RaycastHit2D hitPoint, float distance)
     {
-        return hitPoint.collider && !hitPoint.collider.Equals(collider2d) && hitPoint.distance <= distance;
+        return hitPoint.collider && !hitPoint.collider.Equals(Collider) && hitPoint.distance <= distance;
     }
     
     protected virtual void ApplyMovement(Vector2 distance)
@@ -314,7 +328,6 @@ public abstract class Physic : MonoBehaviour
     public Vector2 Size { get { return size; } }
     public float Weight { get { return weight; } }
     public float Friction { get { return friction; } }
-    public BoxCollider2D Collider2D { get { return collider2d; } }
     public List<ImpactProperty> ImpactProperties { get { return impactProperties; } }
     public int Layer { get { return layerMask; } set { layerMask = value; } }
 
@@ -358,6 +371,7 @@ public abstract class Physic : MonoBehaviour
 
         public void Reset()
         {
+            if (UpHits == null) return;
             UpHits.Clear();
             DownHits.Clear();
             RightHits.Clear();

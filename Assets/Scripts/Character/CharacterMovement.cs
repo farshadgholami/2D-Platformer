@@ -23,11 +23,23 @@ public class CharacterMovement : MonoBehaviour
 
     public bool IsRun { get; set; }
     
-    private void Start()
+    private void Awake()
     {
         Init();
         stats.DeathAction += ForceStop;
     }
+    protected virtual void Init()
+    {
+        stats = GetComponent<CharacterStats>();
+        physic = GetComponent<Physic>();
+        gravity = GetComponent<Gravity>();
+    }
+
+    private void OnEnable()
+    {
+        moveSpeed = moveSpeedBase + increment;
+    }
+
     private void Update()
     {
         Function();
@@ -49,13 +61,7 @@ public class CharacterMovement : MonoBehaviour
             physic.AddSpeed(moveSpeed * (IsRun && hasSprint ? sprintSpeedMultiplier : 1) * side);
         }
     }
-    protected virtual void Init()
-    {
-        moveSpeed = moveSpeedBase + increment;
-        stats = GetComponent<CharacterStats>();
-        physic = GetComponent<Physic>();
-        gravity = GetComponent<Gravity>();
-    }
+
     public virtual void MoveStart(Vector2 direction)
     {
         if (!(direction * gravity.Direction).Equals(Vector2.zero)) return;

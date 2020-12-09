@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class FlyerBrain : PatrollerBrain
 {
@@ -15,7 +13,7 @@ public class FlyerBrain : PatrollerBrain
         this.reservedDirection = reservedDirection;
         targetAvailable = true;
     }
-    protected override void Init()
+    protected override void CalculateDirection()
     {
         moveDirection = Toolkit.SideToVector(direction);
     }
