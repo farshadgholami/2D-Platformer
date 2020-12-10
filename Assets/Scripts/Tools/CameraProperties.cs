@@ -28,10 +28,10 @@ public class CameraProperties : MonoBehaviour
     }
     private void ChangeCameraProperties()
     {
-        CameraFollow.ChangeBoundries(leftDown, rightUp, offset, boundless);
+        CameraFollow.Instance.ChangeBoundries(leftDown, rightUp, offset, boundless);
         if (zoom > 0)
         {
-            CameraFollow.ChangeZoom(zoom);
+            CameraFollow.Instance.ChangeZoom(zoom);
         }
     }
     private void OnTriggerEnter2D(Collider2D collision)

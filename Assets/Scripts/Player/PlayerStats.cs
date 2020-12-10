@@ -1,9 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 
 public class PlayerStats : CharacterStats
 {
+    [SerializeField] private LevelData levelData;
     private int points;
     private int yellowKeyNumber;
     private int redKeyNumber;
@@ -13,11 +13,22 @@ public class PlayerStats : CharacterStats
     private int savedyellowKey;
     private int savedRedKey;
     private int savedBlueKey;
-    protected override void Death()
+
+    private void Awake()
     {
-        base.Death();
+        levelData.data.bestScore = 0;
     }
-    public int Points { get { return points; } set { points = value; } }
+
+    public int Points
+    {
+        get => points;
+        set
+        {
+            points = value;
+            levelData.data.bestScore = value;
+        }
+    }
+
     public int YellowKey { get { return yellowKeyNumber; } set { yellowKeyNumber = value; } }
     public int RedKey { get { return redKeyNumber; } set { redKeyNumber = value; } }
     public int BlueKey { get { return blueKeyNumber; } set { blueKeyNumber = value; } }
@@ -31,7 +42,7 @@ public class PlayerStats : CharacterStats
     protected override void Save()
     {
         base.Save();
-        savedPoints = points;
+        savedPoints = Points;
         savedyellowKey = yellowKeyNumber;
         savedRedKey = redKeyNumber;
         savedBlueKey = blueKeyNumber;
@@ -39,7 +50,7 @@ public class PlayerStats : CharacterStats
     protected override void Load()
     {
         base.Load();
-        points = savedPoints;
+        Points = savedPoints;
         yellowKeyNumber = savedyellowKey;
         redKeyNumber = savedRedKey;
         blueKeyNumber = savedBlueKey;

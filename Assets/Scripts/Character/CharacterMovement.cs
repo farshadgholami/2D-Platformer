@@ -22,7 +22,13 @@ public class CharacterMovement : MonoBehaviour
     protected Vector2 side;
 
     public bool IsRun { get; set; }
-    
+
+    public bool HasSprint
+    {
+        get => hasSprint;
+        set => hasSprint = value;
+    }
+
     private void Awake()
     {
         Init();

@@ -1,10 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.SceneManagement;
+﻿using UnityEngine;
 using System;
 public class GameManager : MonoBehaviour
 {
+    public static int lastLevelLoaded;
     private Action loadSceneAction;
     private Action lateLoadSceneAction;
     private Action saveSceneAction;
@@ -47,6 +45,17 @@ public class GameManager : MonoBehaviour
             latestartCount--;
         }
     }
+
+    public void SaveLastLevel()
+    {
+        var lastLevel = !PlayerPrefs.HasKey("LastLevel") ? 0 : PlayerPrefs.GetInt("LastLevel");
+        if (lastLevelLoaded > lastLevel)
+        {
+            PlayerPrefs.SetInt("LastLevel", lastLevelLoaded);
+            PlayerPrefs.Save();
+        }
+    }
+    
     public static void ReloadScene()
     {
         instance.loadSceneAction?.Invoke();

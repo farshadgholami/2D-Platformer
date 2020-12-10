@@ -109,6 +109,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: 1
+  levelData: {fileID: 11400000, guid: 0355dc43a29bc5344b7db456b44182c1, type: 2}
 --- !u!114 &6198766385952507392
 MonoBehaviour:
   m_ObjectHideFlags: 0

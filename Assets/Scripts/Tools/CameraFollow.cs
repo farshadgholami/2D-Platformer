@@ -23,6 +23,21 @@ public class CameraFollow : MonoBehaviour
     private bool savedBoundless;
     private float savedTargetSize;
 
+    public float Smoothness
+    {
+        get => smoothness;
+        set => smoothness = value;
+    }
+
+    public static CameraFollow Instance
+    {
+        get
+        {
+            if (!instance) instance = FindObjectOfType<CameraFollow>();
+            return instance;
+        }
+    }
+
     private void Awake()
     {
         GameManager.SaveSceneAction += Save;
@@ -52,16 +67,16 @@ public class CameraFollow : MonoBehaviour
         if (Camera.main.orthographicSize != targetSize)
             Camera.main.orthographicSize = Mathf.Lerp(Camera.main.orthographicSize, targetSize, smoothness);
     }
-    public static void ChangeBoundries(Vector2 leftDown, Vector2 rightUp, Vector2 offset, bool boundless)
+    public void ChangeBoundries(Vector2 leftDown, Vector2 rightUp, Vector2 offset, bool boundless)
     {
-        instance.offset = offset;
-        instance.boundless = boundless;
-        instance.leftDown = leftDown;
-        instance.rightUp = rightUp;
+        this.offset = offset;
+        this.boundless = boundless;
+        this.leftDown = leftDown;
+        this.rightUp = rightUp;
     }
-    public static void ChangeZoom(float size)
+    public void ChangeZoom(float size)
     {
-        instance.targetSize = size;
+        targetSize = size;
     }
     private void Save()
     {

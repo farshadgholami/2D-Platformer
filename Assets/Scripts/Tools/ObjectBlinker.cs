@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 
 public class ObjectBlinker : MonoBehaviour
@@ -12,11 +13,15 @@ public class ObjectBlinker : MonoBehaviour
     private WaitForSeconds _enableWaitTime;
     private WaitForSeconds _disableWaitTime;
 
-    private void Start()
+    private void Awake()
     {
-        StartCoroutine(Blink());
         _enableWaitTime = new WaitForSeconds(enableDuration);
         _disableWaitTime = new WaitForSeconds(disableDuration);
+    }
+
+    private void OnEnable()
+    {
+        StartCoroutine(Blink());
     }
 
     private IEnumerator Blink()

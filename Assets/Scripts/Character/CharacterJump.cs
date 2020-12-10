@@ -36,6 +36,18 @@ public class CharacterJump : MonoBehaviour
     private readonly Stack<JumpProperty> jumpPool = new Stack<JumpProperty>();
     private JumpProperty lastJump;
 
+    public bool HasDoubleJump
+    {
+        get => hasDoubleJump;
+        set => hasDoubleJump = value;
+    }
+
+    public bool HasWallJump
+    {
+        get => hasWallJump;
+        set => hasWallJump = value;
+    }
+
     private void Start()
     {
         Init();

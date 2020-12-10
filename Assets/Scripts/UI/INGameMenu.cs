@@ -1,15 +1,25 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class INGameMenu : MonoBehaviour
 {
+    [SerializeField] private GameObject firstPage;
+    [SerializeField] private GameObject optionPage;
+    [SerializeField] private Image wallJumpState;
+    [SerializeField] private Image doubleJumpState;
+    [SerializeField] private Image sprintState;
     private bool active;
     public static INGameMenu sSingletone;
+    private GameObject _player;
+    private CharacterJump _characterJump;
+    private CharacterMovement _characterMovement;
 
     private void Awake()
     {
+        FindPlayer();
+        SetOptionState();
+        
         if (sSingletone == null)
             sSingletone = this;
         else
@@ -17,6 +27,20 @@ public class INGameMenu : MonoBehaviour
 
         active = false;
         gameObject.SetActive(active);
+    }
+
+    private void FindPlayer()
+    {
+        _player = GameObject.FindGameObjectWithTag("Player");
+        _characterJump = _player.GetComponent<CharacterJump>();
+        _characterMovement = _player.GetComponent<CharacterMovement>();
+    }
+
+    private void SetOptionState()
+    {
+        wallJumpState.color = _characterJump.HasWallJump ? Color.yellow : Color.gray;
+        doubleJumpState.color = _characterJump.HasDoubleJump ? Color.yellow : Color.gray;
+        sprintState.color = _characterMovement.HasSprint ? Color.yellow : Color.gray;
     }
 
     public void show()
@@ -40,6 +64,19 @@ public class INGameMenu : MonoBehaviour
         Time.timeScale = 1;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
+    
+    public void LoadMainMenu()
+    {
+        Time.timeScale = 1;
+        SceneManager.LoadScene("Main Menu");
+    }
+    
+    public void Option()
+    {
+        firstPage.SetActive(false);
+        optionPage.SetActive(true);
+    }
+    
     public void Quit()
     {
         #if UNITY_EDITOR
@@ -54,5 +91,34 @@ public class INGameMenu : MonoBehaviour
         gameObject.SetActive(false);
         active = false;
         GameManager.LoadLastCheckPoint();
+    }
+
+    public void ChangeWallJump()
+    {
+        _characterJump.HasWallJump = !_characterJump.HasWallJump;
+        wallJumpState.color = _characterJump.HasWallJump ? Color.yellow : Color.gray;
+    }
+    
+    public void ChangeDoubleJump()
+    {
+        _characterJump.HasDoubleJump = !_characterJump.HasDoubleJump;
+        doubleJumpState.color = _characterJump.HasDoubleJump ? Color.yellow : Color.gray;
+    }
+    
+    public void ChangeSprint()
+    {
+        _characterMovement.HasSprint = !_characterMovement.HasSprint;
+        sprintState.color = _characterMovement.HasSprint ? Color.yellow : Color.gray;
+    }
+    
+    public void Back()
+    {
+        firstPage.SetActive(true);
+        optionPage.SetActive(false);
+    }
+
+    private void OnDisable()
+    {
+        Back();
     }
 }
