@@ -2,77 +2,58 @@
 
 public class ObjectMover : MonoBehaviour
 {
-    [SerializeField] private Vector2[] pathPoints;
     [SerializeField] private float pointOffset;
-    [SerializeField] private bool isPingPong;
     [SerializeField] private float moveSpeed;
+    [SerializeField] private float right;
+    [SerializeField] private float left;
     
     private Transform _transform;
-    private int _pointIndex;
-    private bool _isClockWise = true;
-    private int _pingPongTargetIndex;
+    private Vector2 _startPoint;
     private Physic _physic;
-    private Vector2 _startPosition;
+    private bool _isRightTarget;
+
+    private Vector2 LeftPoint => DirectionPoint(Vector2.left, left);
+    private Vector2 RightPoint => DirectionPoint(Vector2.right, right);
+
+    private Vector2 DirectionPoint(Vector2 direction, float value)
+    {
+        return value * direction + (_startPoint.Equals(Vector2.zero) ? (Vector2) (_transform ? _transform.position : transform.position) : _startPoint);
+    }
 
     private void Start()
     {
         _physic = GetComponent<Physic>();
         _transform = transform;
-        _startPosition = _transform.localPosition;
-        _transform.localPosition = GetTargetPoint();
-        _pingPongTargetIndex = pathPoints.Length - 1;
+        _startPoint = _transform.position;
+        _transform.position = GetTargetPoint();
     }
 
     private void OnDrawGizmosSelected()
     {
-        if (pathPoints.Length == 0) return;
-        Gizmos.color = Color.green;
-        foreach (var point in pathPoints) Gizmos.DrawSphere(point + (_startPosition.Equals(Vector2.zero) ? (Vector2) transform.localPosition : _startPosition), 0.05f);
+        Gizmos.DrawSphere(LeftPoint, 0.05f);
+        Gizmos.DrawSphere(RightPoint, 0.05f);
     }
     
     private void Update()
     {
-        if (IsArrivedTarget()) CalculateNextPointIndex();
+        if (IsArrivedTarget()) _isRightTarget = !_isRightTarget;
 
-        var speed = GetTargetDirection().normalized * moveSpeed;
-        _physic.AddSpeed(speed);
+        _physic.AddSpeed(GetTargetDirection().normalized * moveSpeed);
     }
 
     private Vector2 GetTargetDirection()
     {
-        return GetTargetPoint() - (Vector2) _transform.localPosition;
+        return GetTargetPoint() - (Vector2) _transform.position;
     }
 
     private bool IsArrivedTarget()
     {
-        var a = Vector2.Distance(GetTargetPoint(), _transform.localPosition);
-        //print($"Distance {a} Point Index {_pointIndex}");
+        var a = Vector2.Distance(GetTargetPoint(), _transform.position);
         return a < pointOffset;
     }
 
     private Vector2 GetTargetPoint()
     {
-        return _startPosition + pathPoints[_pointIndex];
-    }
-
-    private void CalculateNextPointIndex()
-    {
-        if (isPingPong)
-            CalcuteNextPointIndexPingPong();
-        else
-        {
-            _pointIndex++;
-            if (_pointIndex == pathPoints.Length) _pointIndex = 0;
-        }
-    }
-
-    private void CalcuteNextPointIndexPingPong()
-    {
-        if (_pointIndex == _pingPongTargetIndex)
-        {
-            _isClockWise = !_isClockWise;
-            _pingPongTargetIndex = _isClockWise ? pathPoints.Length - 1 : 0;
-        }
-        _pointIndex = _isClockWise ? _pointIndex + 1 : _pointIndex - 1;
+        return _isRightTarget ? RightPoint : LeftPoint;
     }
 }

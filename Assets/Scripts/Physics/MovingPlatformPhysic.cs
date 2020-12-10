@@ -15,11 +15,7 @@ public class MovingPlatformPhysic : NormalPhysic
         impacted_objects_.Clear();
         
         distance = (force + speed) / Weight * Time.deltaTime;
-        
-        if (distance.y > 0)
-            MovementCheckUp(distance.y);
-        else if (distance.y < 0) MovementCheckDown(-distance.y);
-        
+
         if (distance.x > 0)
             MovementCheckRight(distance.x);
         else if (distance.x < 0) MovementCheckLeft(-distance.x);
@@ -39,7 +35,7 @@ public class MovingPlatformPhysic : NormalPhysic
 
     private void HorizontalMove(float distance, Vector2 direction)
     {
-        if (this.distance.y <= 0) CheckImpact(raycastPointsY, Vector2.up, collisionCheckDistance, layerMask);
+        CheckImpact(raycastPointsY, Vector2.up, collisionCheckDistance, layerMask);
         if (impact.Up) MoveSidewardHitObjects(impact.UpHits, direction, distance);
         
         CheckImpact(raycastPointsX, direction, distance, layerMask);
@@ -53,24 +49,6 @@ public class MovingPlatformPhysic : NormalPhysic
             var physic = hitObject.collider.GetComponent<Physic>();
             physic.Move(direction * platformMovement);
         }
-    }
-    
-    protected override void MovementCheckUp(float distance)
-    {
-        VerticalMove(distance, Vector2.up);
-        ApplyMovement(Vector2.up * distance);
-    }
-
-    protected override void MovementCheckDown(float distance)
-    {
-        VerticalMove(distance, Vector2.down);
-        ApplyMovement(Vector2.down * distance);
-    }
-
-    private void VerticalMove(float distance, Vector2 direction)
-    {
-        CheckImpact(raycastPointsY, direction, distance, layerMask);
-        if (impact.HasImpact(direction)) MoveHitObjects(impact.GetHits(direction), direction, distance);
     }
 
     private void MoveHitObjects(List<RaycastHit2D> hitObjects, Vector2 direction, float platformMovement)
